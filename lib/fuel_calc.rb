@@ -19,6 +19,16 @@ class FuelCalc
 
   class << self
     def calculate(mass:, route:)
+      parse_route(route).reverse.reduce(0) do |memo, point|
+        case point[0]
+        when :launch
+          memo += calculate_fuel_for_launch(mass: mass + memo, gravity: point[1])
+        when :land
+          memo += calculate_fuel_for_land(mass: mass + memo, gravity: point[1])
+        end
+
+        memo
+      end
     end
 
     def parse_route(route)

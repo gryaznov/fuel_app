@@ -5,18 +5,36 @@ require './lib/fuel_calc'
 
 describe FuelCalc do
   describe 'calculate' do
-    it 'returns correct results' do
-      assert_equal \
-        51_898,
-        FuelCalc.calculate(mass: 28_801, route: [[:launch, 9.807], [:land, 1.62], [:launch, 1.62], [:land, 9.807]])
+    describe 'formal route argument' do
+      it 'returns correct results' do
+        assert_equal \
+          51_898,
+          FuelCalc.calculate(mass: 28_801, route: [[:launch, 9.807], [:land, 1.62], [:launch, 1.62], [:land, 9.807]])
 
-      assert_equal \
-        33_388,
-        FuelCalc.calculate(mass: 14_606, route: [[:launch, 9.807], [:land, 3.711], [:launch, 3.711], [:land, 9.807]])
+        assert_equal \
+          33_388,
+          FuelCalc.calculate(mass: 14_606, route: [[:launch, 9.807], [:land, 3.711], [:launch, 3.711], [:land, 9.807]])
 
-      assert_equal \
-        212_161,
-        FuelCalc.calculate(mass: 75_432, route: [[:launch, 9.807], [:land, 1.62], [:launch, 1.62], [:land, 3.711], [:launch, 3.711], [:land, 9.807]])
+        assert_equal \
+          212_161,
+          FuelCalc.calculate(mass: 75_432, route: [[:launch, 9.807], [:land, 1.62], [:launch, 1.62], [:land, 3.711], [:launch, 3.711], [:land, 9.807]])
+      end
+    end
+
+    describe 'destination points as route argument' do
+      it 'returns correct results' do
+        assert_equal \
+          51_898,
+          FuelCalc.calculate(mass: 28_801, route: %w[Earth Moon Moon Earth])
+
+        assert_equal \
+          33_388,
+          FuelCalc.calculate(mass: 14_606, route: %i[earth mars mars earth])
+
+        assert_equal \
+          212_161,
+          FuelCalc.calculate(mass: 75_432, route: %w[Earth Moon Moon Mars Mars Earth])
+      end
     end
   end
 
