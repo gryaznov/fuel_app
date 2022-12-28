@@ -5,6 +5,11 @@ require './lib/fuel_calc'
 
 describe FuelCalc do
   describe 'calculate' do
+    it 'raises an error if incorrect mass given' do
+      assert_raises(FuelCalcError) { FuelCalc.calculate(mass: -20, route: [[:launch, 9.807], [:land, 1.62]]) }
+      assert_raises(FuelCalcError) { FuelCalc.calculate(mass: nil, route: [[:launch, 9.807], [:land, 1.62]]) }
+    end
+
     describe 'formal route argument' do
       it 'returns correct results' do
         assert_equal \
@@ -38,25 +43,25 @@ describe FuelCalc do
     end
   end
 
-  describe '.parse_route' do
+  describe '.inspect_route' do
     it 'raises an error if a given argument does not lool like a route' do
-      assert_raises(FuelCalcError) { FuelCalc.parse_route(66) }
-      assert_raises(FuelCalcError) { FuelCalc.parse_route([9.807, 1.62]) }
+      assert_raises(FuelCalcError) { FuelCalc.inspect_route(66) }
+      assert_raises(FuelCalcError) { FuelCalc.inspect_route([9.807, 1.62]) }
     end
 
     it 'returns correct value if a formal argument is given' do
       assert_equal [[:launch, 9.807], [:land, 3.711], [:launch, 3.711], [:land, 9.807]],
-                   FuelCalc.parse_route([[:launch, 9.807], [:land, 3.711], [:launch, 3.711], [:land, 9.807]])
+                   FuelCalc.inspect_route([[:launch, 9.807], [:land, 3.711], [:launch, 3.711], [:land, 9.807]])
     end
 
     it 'returns correct value if an array of destination points names are given (strings)' do
       assert_equal [[:launch, 9.807], [:land, 1.62], [:launch, 1.62], [:land, 3.711], [:launch, 3.711], [:land, 9.807]],
-                   FuelCalc.parse_route(%w[Earth Moon Moon Mars Mars Earth])
+                   FuelCalc.inspect_route(%w[Earth Moon Moon Mars Mars Earth])
     end
 
     it 'returns correct value if an array of destination points names are given (symbols)' do
       assert_equal [[:launch, 9.807], [:land, 1.62], [:launch, 1.62], [:land, 3.711], [:launch, 3.711], [:land, 9.807]],
-                   FuelCalc.parse_route(%i[earth moon moon mars mars earth])
+                   FuelCalc.inspect_route(%i[earth moon moon mars mars earth])
     end
   end
 

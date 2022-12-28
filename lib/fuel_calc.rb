@@ -19,29 +19,18 @@ class FuelCalc
 
   class << self
     def calculate(mass:, route:)
-      parse_route(route).reverse.reduce(0) do |memo, point|
+      inspected_mass, inspected_route = inspect_inputs(mass: mass, route: route)
+
+      inspected_route.reverse.reduce(0) do |memo, point|
         case point[0]
         when :launch
-          memo += calculate_fuel_for_launch(mass: mass + memo, gravity: point[1])
+          memo += calculate_fuel_for_launch(mass: inspected_mass + memo, gravity: point[1])
         when :land
-          memo += calculate_fuel_for_land(mass: mass + memo, gravity: point[1])
+          memo += calculate_fuel_for_land(mass: inspected_mass + memo, gravity: point[1])
         end
 
         memo
       end
-    end
-
-    def parse_route(route)
-      raise FuelCalcError, 'Wrong route format. Must be an Array.' unless route.is_a?(Array)
-      return route if route.all? { |el| el.is_a?(Array) }
-
-      if route.all? { |el| el.is_a?(String) || el.is_a?(Symbol) }
-        return route.map.with_index do |point, index|
-          index.even? && [:launch, GRAVITIES[point.to_s.downcase]] || [:land, GRAVITIES[point.to_s.downcase]]
-        end
-      end
-
-      raise FuelCalcError, "Unable to regonize the flight route: #{route}."
     end
 
     def calculate_fuel_for_launch(mass:, gravity:)
@@ -65,7 +54,35 @@ class FuelCalc
     def landing_calculation_formula(mass:, gravity:)
       (mass * gravity * LANDING_COEFFICIENT - LAUNCHING_COEFFICIENT * 1000).floor
     end
+
+    def inspect_inputs(mass:, route:)
+      [inspect_mass(mass), inspect_route(route)]
+    end
+
+    def inspect_mass(mass)
+      raise FuelCalcError, 'Incorrect mass input' unless mass.to_i.positive?
+
+      mass
+    end
+
+    def inspect_route(route)
+      raise FuelCalcError, 'Incorrect route input. Must be an Array.' unless route.is_a?(Array)
+      return route if route.all? { |el| el.is_a?(Array) }
+
+      if route.all? { |el| el.is_a?(String) || el.is_a?(Symbol) }
+        return route.map.with_index do |point, index|
+          index.even? && [:launch, GRAVITIES[point.to_s.downcase]] || [:land, GRAVITIES[point.to_s.downcase]]
+        end
+      end
+
+      raise FuelCalcError, "Unable to build the flight route. Please, check your input: #{route}."
+    end
   end
 end
 
-FuelCalc.calculate(mass: ARGV[0], route: ARGV[-1..1]) if ARGV.length > 1
+if ARGV.length > 1
+  mass, *points = ARGV
+
+  result = FuelCalc.calculate(mass: mass.to_i, route: points)
+  p "Fuel required for the flight: #{result}."
+end
